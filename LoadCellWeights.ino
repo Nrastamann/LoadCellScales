@@ -7,7 +7,10 @@
 const int HX711_dout[] = {31,33,35,37}; //mcu > HX711 dout pin
 const int HX711_sck[] = {30,32,34,36}; //mcu > HX711 sck pin
 
-const int calFactor = 1.0;
+const int calFactor_1 = 1.0;
+const int calFactor_2 = 1.0;
+const int calFactor_3 = 1.0;
+const int calFactor_4 = 1.0;
 
 //HX711 constructor:
 HX711_ADC LoadCell_1(HX711_dout[0], HX711_sck[0]);
@@ -81,8 +84,8 @@ void loop() {
 }
 
 void calibrate() {
-        LoadCell_1.setCalFactor(calFactor);
-        LoadCell_2.setCalFactor(calFactor);
-        LoadCell_3.setCalFactor(calFactor);
-        LoadCell_4.setCalFactor(calFactor);
+        LoadCell_1.setCalFactor(calFactor_1);
+        LoadCell_2.setCalFactor(calFactor_2);
+        LoadCell_3.setCalFactor(calFactor_3);
+        LoadCell_4.setCalFactor(calFactor_4);
   }
