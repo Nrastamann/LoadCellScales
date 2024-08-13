@@ -74,13 +74,16 @@ void setup()
   if (LoadCell_1.getTareTimeoutFlag() || LoadCell_1.getSignalTimeoutFlag() || LoadCell_2.getTareTimeoutFlag() || LoadCell_2.getSignalTimeoutFlag() || LoadCell_3.getTareTimeoutFlag() || LoadCell_3.getSignalTimeoutFlag() || LoadCell_4.getTareTimeoutFlag() || LoadCell_4.getSignalTimeoutFlag())
   {
     Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1)
-      ;
+    while (1);
   }
   else
   {
-    calibrate(); // start calibration procedure
+    calibrate(LoadCell_1, calFactor_1); // start calibration procedure
+    calibrate(LoadCell_2, calFactor_2);
+    calibrate(LoadCell_3, calFactor_3);
+    calibrate(LoadCell_4, calFactor_4);
   }
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop()
@@ -171,12 +174,23 @@ void loop()
   }
 }
 
-void calibrate()
+void calibrate(HX711_ADC LoadCell, int calFactor)
 {
-  LoadCell_1.setCalFactor(calFactor_1);
-  LoadCell_2.setCalFactor(calFactor_2);
-  LoadCell_3.setCalFactor(calFactor_3);
-  LoadCell_4.setCalFactor(calFactor_4);
+  LoadCell.setCalFactor(calFactor);
 
-  digitalWrite(LED_BUILTIN, LOW);
+  boolean _resume = false;
+  unsigned long tareTime = millis();
+  while (_resume == false)
+  {
+    LoadCell_1.update();
+    if (millis() - tareTime > 1000)
+    {
+      LoadCell.tareNoDelay();
+    }
+    if (LoadCell.getTareStatus() == true)
+    {
+      Serial.println("Tare complete");
+      _resume = true;
+    }
+  }
 }
