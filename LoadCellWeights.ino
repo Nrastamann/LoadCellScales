@@ -40,6 +40,9 @@ bool flag;
 constexpr short serialPrintInterval = 0;   // increase value to slow down serial print activity
 constexpr unsigned stabilizingtime = 3000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
 unsigned int timer = 0;
+
+unsigned amount = 0;
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -104,57 +107,65 @@ void loop()
     }
 
     File.println("LoadCell_1;LoadCell_2;LoadCell_3;LoadCell_4;Pitot");
-    if (LoadCell_1.update() && LoadCell_2.update() && LoadCell_3.update() && LoadCell_4.update() && Pitot.available() > 0)
-      newDataReady = true;
-    // get smoothed value from the dataset:
-    if (newDataReady)
+    while (true)
     {
-      if (millis() > t + serialPrintInterval)
+      if (LoadCell_1.update() && LoadCell_2.update() && LoadCell_3.update() && LoadCell_4.update() && Pitot.available() > 0)
+        newDataReady = true;
+      // get smoothed value from the dataset:
+      if (newDataReady)
       {
-        float i = LoadCell_1.getData();
-        float j = LoadCell_2.getData();
-        float k = LoadCell_3.getData();
-        float l = LoadCell_4.getData();
-        float m = Pitot.read();
+        if (millis() > t + serialPrintInterval)
+        {
+          float i = LoadCell_1.getData();
+          float j = LoadCell_2.getData();
+          float k = LoadCell_3.getData();
+          float l = LoadCell_4.getData();
+          float m = Pitot.read();
 
-        File.print(i);
-        File.print(";");
+          File.print(i);
+          File.print(";");
 
-        File.print(j);
-        File.print(";");
+          File.print(j);
+          File.print(";");
 
-        File.print(k);
-        File.print(";");
+          File.print(k);
+          File.print(";");
 
-        File.print(l);
-        File.print(";");
+          File.print(l);
+          File.print(";");
 
-        File.println(m);
+          File.println(m);
 
-        Serial.print("Load_cell_1 output val: ");
-        Serial.println(i);
+          Serial.print("Load_cell_1 output val: ");
+          Serial.println(i);
 
-        Serial.print("Load_cell_2 output val: ");
-        Serial.println(j);
+          Serial.print("Load_cell_2 output val: ");
+          Serial.println(j);
 
-        Serial.print("Load_cell_3 output val: ");
-        Serial.println(k);
+          Serial.print("Load_cell_3 output val: ");
+          Serial.println(k);
 
-        Serial.print("Load_cell_4 output val: ");
-        Serial.println(l);
+          Serial.print("Load_cell_4 output val: ");
+          Serial.println(l);
 
-        Serial.print("Pitot tube output val: ");
-        Serial.println(m);
+          Serial.print("Pitot tube output val: ");
+          Serial.println(m);
 
-        newDataReady = 0;
-        t = millis();
-      }
-      if (buttonState != flag && millis() - timer > 100 && !button)
-      {
-        flag = false;
-        timer = millis();
-        SD.Close();
-        break;
+          newDataReady = 0;
+          t = millis();
+        }
+        if (buttonState != flag && millis() - timer > 100 && !button)
+        {
+          flag = false;
+          timer = millis();
+          SD.Close();
+
+          amount++;
+          fileName[10] = amount / 100 + 48;
+          fileName[11] = amount % 100 / 10 + 48;
+          fileName[12] = amount % 10 + 48;
+          break;
+        }
       }
     }
   }
