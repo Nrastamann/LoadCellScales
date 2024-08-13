@@ -34,13 +34,17 @@ HX711_ADC LoadCell_4(HX711_dout[3], HX711_sck[3]);
 SoftwareSerial Pitot(PitotRX, PitotTX);
 
 //const int calVal_eepromAdress = 0;
-unsigned long t = 0;
+//Time consts:
+constexpr short serialPrintInterval = 0; //increase value to slow down serial print activity
+constexpr unsigned stabilizingtime = 3000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT)
   pinMode(button, INPUT_PULLUP);
 
   Serial.begin(115200); delay(10);
+  Pitot.begin(115200);
+
   digitalWrite(LED_BUILTIN, HIGH);
 
   Serial.println();
@@ -51,8 +55,6 @@ void setup() {
   LoadCell_3.begin();
   LoadCell_4.begin();
 
-  //LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
-  unsigned long stabilizingtime = 3000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
   boolean _tare = true; //set this to false if you don't want tare to be performed in the next step
   
   LoadCell_1.start(stabilizingtime, _tare);
@@ -71,8 +73,7 @@ void setup() {
 
 void loop() {
   static boolean newDataReady = 0;
-  const int serialPrintInterval = 0; //increase value to slow down serial print activity
-
+  static unsigned long t = 0;
   // check for new data/start next conversion:
   if (LoadCell_1.update()&&LoadCell_2.update()&&LoadCell_3.update()&&LoadCell_4.update()&&Pitot.available()>0) newDataReady = true;
 
@@ -85,6 +86,7 @@ void loop() {
       float k = LoadCell_3.getData();
       float l = LoadCell_4.getData();
       float m = Pitot.read();
+
       Serial.print("Load_cell_1 output val: ");
       Serial.println(i);
       
