@@ -37,7 +37,12 @@ SoftwareSerial Pitot(PitotRX, PitotTX);
 unsigned long t = 0;
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT)
+  pinMode(button, INPUT_PULLUP);
+
   Serial.begin(115200); delay(10);
+  digitalWrite(LED_BUILTIN, HIGH);
+
   Serial.println();
   Serial.println("Starting...");
 
@@ -62,8 +67,6 @@ void setup() {
   else {
   calibrate(); //start calibration procedure
   }
-  pinMode(LED_BUILTIN, OUTPUT)
-  pinMode(button, INPUT_PULLUP);
 }
 
 void loop() {
@@ -71,7 +74,7 @@ void loop() {
   const int serialPrintInterval = 0; //increase value to slow down serial print activity
 
   // check for new data/start next conversion:
-  if (LoadCell_1.update()&&LoadCell_2.update()&&LoadCell_3.update()&&LoadCell_4.update()) newDataReady = true;
+  if (LoadCell_1.update()&&LoadCell_2.update()&&LoadCell_3.update()&&LoadCell_4.update()&&Pitot.available()>0) newDataReady = true;
 
   // get smoothed value from the dataset:
   if (newDataReady) {
@@ -81,7 +84,7 @@ void loop() {
       float j = LoadCell_2.getData();
       float k = LoadCell_3.getData();
       float l = LoadCell_4.getData();
-      
+      float m = Pitot.read();
       Serial.print("Load_cell_1 output val: ");
       Serial.println(i);
       
@@ -94,6 +97,9 @@ void loop() {
       Serial.print("Load_cell_4 output val: ");
       Serial.println(l);
       
+      Serial.print("Pitot tube output val: ");
+      Serial.println(m);
+
       newDataReady = 0;
       t = millis();
     }
@@ -105,4 +111,6 @@ void calibrate() {
         LoadCell_2.setCalFactor(calFactor_2);
         LoadCell_3.setCalFactor(calFactor_3);
         LoadCell_4.setCalFactor(calFactor_4);
+
+        digitalWrite(LED_BUILTIN, LOW);
   }
