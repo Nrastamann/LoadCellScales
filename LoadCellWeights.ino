@@ -1,27 +1,37 @@
 //Программа для весов
 //Пока убраны все операции тарирования, обнуления весов, надо будет еще почитать, вернуть обнуление весов сделать по кнопке
-//Добавить собственно обработку кнопки, пвд наверно вынести на hardwareSerial, чтобы оставалась возможность дебагга на месте при подключении к компу
+//Добавить собственно обработку кнопки, пвд наверно вынести на SoftwareSerial, чтобы оставалась возможность дебагга на месте при подключении к компу
 //Отладить, написать нормальные комментарии, добавить запись логов на sd-карту
 //Вычислить коэффициенты для калибровки
 
 
 
 #include <HX711_ADC.h>
+#include <SoftwareSerial.h>
 
 //pins:
-const int HX711_dout[] = {31,33,35,37}; //mcu > HX711 dout pin
-const int HX711_sck[] = {30,32,34,36}; //mcu > HX711 sck pin
+constexpr int HX711_dout[] = {31,33,35,37}; //mcu > HX711 dout pin
+constexpr int HX711_sck[] = {30,32,34,36}; //mcu > HX711 sck pin
 
-const int calFactor_1 = 1.0;
-const int calFactor_2 = 1.0;
-const int calFactor_3 = 1.0;
-const int calFactor_4 = 1.0;
+constexpr short pitotRX = 15;
+constexpr short pitotTX = 14;
+
+constexpr short button = 39;
+//Calibration consts:
+
+constexpr int calFactor_1 = 1.0;
+constexpr int calFactor_2 = 1.0;
+constexpr int calFactor_3 = 1.0;
+constexpr int calFactor_4 = 1.0;
 
 //HX711 constructor:
 HX711_ADC LoadCell_1(HX711_dout[0], HX711_sck[0]);
 HX711_ADC LoadCell_2(HX711_dout[1], HX711_sck[1]);
 HX711_ADC LoadCell_3(HX711_dout[2], HX711_sck[2]);
 HX711_ADC LoadCell_4(HX711_dout[3], HX711_sck[3]);
+
+//Software Serial constructor:
+SoftwareSerial Pitot(PitotRX, PitotTX);
 
 //const int calVal_eepromAdress = 0;
 unsigned long t = 0;
@@ -52,6 +62,8 @@ void setup() {
   else {
   calibrate(); //start calibration procedure
   }
+  pinMode(LED_BUILTIN, OUTPUT)
+  pinMode(button, INPUT_PULLUP);
 }
 
 void loop() {
