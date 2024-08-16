@@ -32,7 +32,7 @@ HX711_ADC LoadCell_3(HX711_dout[2], HX711_sck[2]);
 HX711_ADC LoadCell_4(HX711_dout[3], HX711_sck[3]);
 
 // Software Serial constructor:
-SoftwareSerial Pitot(PitotRX, PitotTX);
+SoftwareSerial Pitot(pitotRX, pitotTX);
 
 bool flag;
 // const int calVal_eepromAdress = 0;
@@ -74,7 +74,8 @@ void setup()
   if (LoadCell_1.getTareTimeoutFlag() || LoadCell_1.getSignalTimeoutFlag() || LoadCell_2.getTareTimeoutFlag() || LoadCell_2.getSignalTimeoutFlag() || LoadCell_3.getTareTimeoutFlag() || LoadCell_3.getSignalTimeoutFlag() || LoadCell_4.getTareTimeoutFlag() || LoadCell_4.getSignalTimeoutFlag())
   {
     Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1);
+    while (1)
+      ;
   }
   else
   {
@@ -98,9 +99,9 @@ void loop()
     timer = millis();
     flag = true;
 
-    File LogFile = SD.open(fileName, FILE_WRITE);
+    File logFile = SD.open(fileName, FILE_WRITE);
 
-    while (!LogFile)
+    while (!logFile)
     {
       digitalWrite(LED_BUILTIN, HIGH);
       delay(150);
@@ -109,7 +110,7 @@ void loop()
       delay(150);
     }
 
-    File.println("LoadCell_1;LoadCell_2;LoadCell_3;LoadCell_4;Pitot");
+    logFile.println("LoadCell_1;LoadCell_2;LoadCell_3;LoadCell_4;Pitot");
     while (true)
     {
       if (LoadCell_1.update() && LoadCell_2.update() && LoadCell_3.update() && LoadCell_4.update() && Pitot.available() > 0)
@@ -125,19 +126,19 @@ void loop()
           float l = LoadCell_4.getData();
           float m = Pitot.read();
 
-          File.print(i);
-          File.print(";");
+          logFile.print(i);
+          logFile.print(";");
 
-          File.print(j);
-          File.print(";");
+          logFile.print(j);
+          logFile.print(";");
 
-          File.print(k);
-          File.print(";");
+          logFile.print(k);
+          logFile.print(";");
 
-          File.print(l);
-          File.print(";");
+          logFile.print(l);
+          logFile.print(";");
 
-          File.println(m);
+          logFile.println(m);
 
           Serial.print("Load_cell_1 output val: ");
           Serial.println(i);
@@ -161,7 +162,7 @@ void loop()
         {
           flag = false;
           timer = millis();
-          SD.Close();
+          logFile.close();
 
           amount++;
           fileName[10] = amount / 100 + 48;
